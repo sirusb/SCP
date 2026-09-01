@@ -2147,9 +2147,9 @@ FeatureDimPlot <- function(srt, features, reduction = NULL, dims = c(1, 2), spli
     status <- check_DataType(srt, slot = slot, assay = assay)
     message("Data type detected in ", slot, " slot: ", status)
     if (status %in% c("raw_counts", "raw_normalized_counts")) {
-      srt@meta.data[["CoExp"]] <- apply(slot(srt@assays[[assay]], slot)[features_gene, , drop = FALSE], 2, function(x) exp(mean(log(x))))
+      srt@meta.data[["CoExp"]] <- apply(scp_get_assay_data(srt, assay = assay, slot = slot)[features_gene, , drop = FALSE], 2, function(x) exp(mean(log(x))))
     } else if (status == "log_normalized_counts") {
-      srt@meta.data[["CoExp"]] <- apply(expm1(slot(srt@assays[[assay]], slot)[features_gene, , drop = FALSE]), 2, function(x) log1p(exp(mean(log(x)))))
+      srt@meta.data[["CoExp"]] <- apply(expm1(scp_get_assay_data(srt, assay = assay, slot = slot)[features_gene, , drop = FALSE]), 2, function(x) log1p(exp(mean(log(x)))))
     } else {
       stop("Can not determine the data type.")
     }
@@ -2159,9 +2159,9 @@ FeatureDimPlot <- function(srt, features, reduction = NULL, dims = c(1, 2), spli
 
   if (length(features_gene) > 0) {
     if (all(rownames(srt@assays[[assay]]) %in% features_gene)) {
-      dat_gene <- t(as_matrix(slot(srt@assays[[assay]], slot)))
+      dat_gene <- t(as_matrix(scp_get_assay_data(srt, assay = assay, slot = slot)))
     } else {
-      dat_gene <- t(as_matrix(slot(srt@assays[[assay]], slot)[features_gene, , drop = FALSE]))
+      dat_gene <- t(as_matrix(scp_get_assay_data(srt, assay = assay, slot = slot)[features_gene, , drop = FALSE]))
     }
   } else {
     dat_gene <- matrix(nrow = ncol(srt@assays[[1]]), ncol = 0)
@@ -3156,9 +3156,9 @@ FeatureDimPlot3D <- function(srt, features, reduction = NULL, dims = c(1, 2, 3),
     status <- check_DataType(srt, slot = slot, assay = assay)
     message("Data type detected in ", slot, " slot: ", status)
     if (status %in% c("raw_counts", "raw_normalized_counts")) {
-      srt@meta.data[["CoExp"]] <- apply(slot(srt@assays[[assay]], slot)[features_gene, , drop = FALSE], 2, function(x) exp(mean(log(x))))
+      srt@meta.data[["CoExp"]] <- apply(scp_get_assay_data(srt, assay = assay, slot = slot)[features_gene, , drop = FALSE], 2, function(x) exp(mean(log(x))))
     } else if (status == "log_normalized_counts") {
-      srt@meta.data[["CoExp"]] <- apply(expm1(slot(srt@assays[[assay]], slot)[features_gene, , drop = FALSE]), 2, function(x) log1p(exp(mean(log(x)))))
+      srt@meta.data[["CoExp"]] <- apply(expm1(scp_get_assay_data(srt, assay = assay, slot = slot)[features_gene, , drop = FALSE]), 2, function(x) log1p(exp(mean(log(x)))))
     } else {
       stop("Can not determine the data type.")
     }
@@ -3168,9 +3168,9 @@ FeatureDimPlot3D <- function(srt, features, reduction = NULL, dims = c(1, 2, 3),
 
   if (length(features_gene) > 0) {
     if (all(rownames(srt@assays[[assay]]) %in% features_gene)) {
-      dat_gene <- t(as_matrix(slot(srt@assays[[assay]], slot)))
+      dat_gene <- t(as_matrix(scp_get_assay_data(srt, assay = assay, slot = slot)))
     } else {
-      dat_gene <- t(as_matrix(slot(srt@assays[[assay]], slot)[features_gene, , drop = FALSE]))
+      dat_gene <- t(as_matrix(scp_get_assay_data(srt, assay = assay, slot = slot)[features_gene, , drop = FALSE]))
     }
   } else {
     dat_gene <- matrix(nrow = ncol(srt@assays[[1]]), ncol = 0)
@@ -3551,7 +3551,7 @@ FeatureStatPlot <- function(srt, stat.by, group.by = NULL, split.by = NULL, bg.b
   meta.data <- srt@meta.data
   meta.data[["cells"]] <- rownames(meta.data)
   assay <- assay %||% DefaultAssay(srt)
-  exp.data <- slot(srt@assays[[assay]], slot)
+  exp.data <- scp_get_assay_data(srt, assay = assay, slot = slot)
   plot.by <- match.arg(plot.by)
 
   if (plot.by == "feature") {
@@ -5296,9 +5296,9 @@ FeatureCorPlot <- function(srt, features, group.by = NULL, split.by = NULL, cell
       warning(paste(features_meta, collapse = ","), "is not used when calculating co-expression", immediate. = TRUE)
     }
     if (status %in% c("raw_counts", "raw_normalized_counts")) {
-      srt@meta.data[["CoExp"]] <- apply(slot(srt@assays[[assay]], slot)[features_gene, , drop = FALSE], 2, function(x) exp(mean(log(x))))
+      srt@meta.data[["CoExp"]] <- apply(scp_get_assay_data(srt, assay = assay, slot = slot)[features_gene, , drop = FALSE], 2, function(x) exp(mean(log(x))))
     } else if (status == "log_normalized_counts") {
-      srt@meta.data[["CoExp"]] <- apply(expm1(slot(srt@assays[[assay]], slot)[features_gene, , drop = FALSE]), 2, function(x) log1p(exp(mean(log(x)))))
+      srt@meta.data[["CoExp"]] <- apply(expm1(scp_get_assay_data(srt, assay = assay, slot = slot)[features_gene, , drop = FALSE]), 2, function(x) log1p(exp(mean(log(x)))))
     } else {
       stop("Can not determine the data type.")
     }
@@ -5306,7 +5306,7 @@ FeatureCorPlot <- function(srt, features, group.by = NULL, split.by = NULL, cell
     features_meta <- c(features_meta, "CoExp")
   }
   if (length(features_gene) > 0) {
-    dat_gene <- t(slot(srt@assays[[assay]], slot)[features_gene, , drop = FALSE])
+    dat_gene <- t(scp_get_assay_data(srt, assay = assay, slot = slot)[features_gene, , drop = FALSE])
   } else {
     dat_gene <- matrix(nrow = ncol(srt@assays[[1]]), ncol = 0)
   }
@@ -5729,7 +5729,7 @@ CellDensityPlot <- function(srt, features, group.by = NULL, split.by = NULL, ass
   }
 
   if (length(features_gene) > 0) {
-    dat_gene <- t(slot(srt@assays[[assay]], slot)[features_gene, , drop = FALSE])
+    dat_gene <- t(scp_get_assay_data(srt, assay = assay, slot = slot)[features_gene, , drop = FALSE])
   } else {
     dat_gene <- matrix(nrow = ncol(srt@assays[[1]]), ncol = 0)
   }
@@ -8074,8 +8074,9 @@ GroupHeatmap <- function(srt, features = NULL, group.by = NULL, split.by = NULL,
     if (length(npal[npal != 0]) > 1) {
       stop("feature_annotation_palette and feature_annotation_palcolor must be the same length as feature_annotation")
     }
-    if (any(!feature_annotation %in% colnames(srt@assays[[assay]]@meta.features))) {
-      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% colnames(srt@assays[[assay]]@meta.features)], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
+    feature_annotation_names <- colnames(scp_get_feature_metadata(srt, assay = assay))
+    if (any(!feature_annotation %in% feature_annotation_names)) {
+      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% feature_annotation_names], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
     }
   }
   if (length(width) == 1) {
@@ -8152,13 +8153,13 @@ GroupHeatmap <- function(srt, features = NULL, group.by = NULL, split.by = NULL,
   gene_unique <- features_unique[features %in% rownames(srt@assays[[assay]])]
   meta <- features[features %in% colnames(srt@meta.data)]
 
-  mat_raw <- as_matrix(rbind(slot(srt@assays[[assay]], slot)[gene, cells, drop = FALSE], t(srt@meta.data[cells, meta, drop = FALSE])))[features, , drop = FALSE]
+  mat_raw <- as_matrix(rbind(scp_get_assay_data(srt, assay = assay, slot = slot)[gene, cells, drop = FALSE], t(srt@meta.data[cells, meta, drop = FALSE])))[features, , drop = FALSE]
   rownames(mat_raw) <- features_unique
   if (isTRUE(lib_normalize) && min(mat_raw, na.rm = TRUE) >= 0) {
     if (!is.null(libsize)) {
       libsize_use <- libsize
     } else {
-      libsize_use <- colSums(slot(srt@assays[[assay]], "counts")[, colnames(mat_raw), drop = FALSE])
+      libsize_use <- colSums(scp_get_assay_data(srt, assay = assay, slot = "counts")[, colnames(mat_raw), drop = FALSE])
       isfloat <- any(libsize_use %% 1 != 0, na.rm = TRUE)
       if (isTRUE(isfloat)) {
         libsize_use <- rep(1, length(libsize_use))
@@ -8246,12 +8247,13 @@ GroupHeatmap <- function(srt, features = NULL, group.by = NULL, split.by = NULL,
     data.frame(row.names = cells, cells = cells),
     cbind.data.frame(
       srt@meta.data[cells, c(group.by, intersect(cell_annotation, colnames(srt@meta.data))), drop = FALSE],
-      t(srt@assays[[assay]]@data[intersect(cell_annotation, rownames(srt@assays[[assay]])) %||% integer(), cells, drop = FALSE])
+      t(scp_get_assay_data(srt, assay = assay, slot = "data")[intersect(cell_annotation, rownames(srt@assays[[assay]])) %||% integer(), cells, drop = FALSE])
     )
   )
+  feature_meta <- scp_get_feature_metadata(srt, assay = assay)
   feature_metadata <- cbind.data.frame(
-    data.frame(row.names = features_unique, features = features, features_uique = features_unique),
-    srt@assays[[assay]]@meta.features[features, intersect(feature_annotation, colnames(srt@assays[[assay]]@meta.features)), drop = FALSE]
+    data.frame(row.names = features_unique, features = features, features_unique = features_unique),
+    feature_meta[features, intersect(feature_annotation, colnames(feature_meta)), drop = FALSE]
   )
   feature_metadata[, "duplicated"] <- feature_metadata[["features"]] %in% features[duplicated(features)]
 
@@ -9241,8 +9243,9 @@ FeatureHeatmap <- function(srt, features = NULL, cells = NULL, group.by = NULL, 
     if (length(npal[npal != 0]) > 1) {
       stop("feature_annotation_palette and feature_annotation_palcolor must be the same length as feature_annotation")
     }
-    if (any(!feature_annotation %in% colnames(srt@assays[[assay]]@meta.features))) {
-      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% colnames(srt@assays[[assay]]@meta.features)], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
+    feature_annotation_names <- colnames(scp_get_feature_metadata(srt, assay = assay))
+    if (any(!feature_annotation %in% feature_annotation_names)) {
+      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% feature_annotation_names], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
     }
   }
   if (length(width) == 1) {
@@ -9337,13 +9340,13 @@ FeatureHeatmap <- function(srt, features = NULL, cells = NULL, group.by = NULL, 
   gene_unique <- features_unique[features %in% rownames(srt@assays[[assay]])]
   meta <- features[features %in% colnames(srt@meta.data)]
   all_cells <- unique(unlist(lapply(cell_groups, names)))
-  mat_raw <- as_matrix(rbind(slot(srt@assays[[assay]], slot)[gene, all_cells, drop = FALSE], t(srt@meta.data[all_cells, meta, drop = FALSE])))[features, , drop = FALSE]
+  mat_raw <- as_matrix(rbind(scp_get_assay_data(srt, assay = assay, slot = slot)[gene, all_cells, drop = FALSE], t(srt@meta.data[all_cells, meta, drop = FALSE])))[features, , drop = FALSE]
   rownames(mat_raw) <- features_unique
   if (isTRUE(lib_normalize) && min(mat_raw, na.rm = TRUE) >= 0) {
     if (!is.null(libsize)) {
       libsize_use <- libsize
     } else {
-      libsize_use <- colSums(slot(srt@assays[[assay]], "counts")[, colnames(mat_raw), drop = FALSE])
+      libsize_use <- colSums(scp_get_assay_data(srt, assay = assay, slot = "counts")[, colnames(mat_raw), drop = FALSE])
       isfloat <- any(libsize_use %% 1 != 0, na.rm = TRUE)
       if (isTRUE(isfloat)) {
         libsize_use <- rep(1, length(libsize_use))
@@ -9391,12 +9394,12 @@ FeatureHeatmap <- function(srt, features = NULL, cells = NULL, group.by = NULL, 
     data.frame(row.names = colnames(mat_raw), cells = colnames(mat_raw)),
     cbind.data.frame(
       srt@meta.data[colnames(mat_raw), c(group.by, intersect(cell_annotation, colnames(srt@meta.data))), drop = FALSE],
-      t(srt@assays[[assay]]@data[intersect(cell_annotation, rownames(srt@assays[[assay]])) %||% integer(), colnames(mat_raw), drop = FALSE])
+      t(scp_get_assay_data(srt, assay = assay, slot = "data")[intersect(cell_annotation, rownames(srt@assays[[assay]])) %||% integer(), colnames(mat_raw), drop = FALSE])
     )
   )
   feature_metadata <- cbind.data.frame(
-    data.frame(row.names = features_unique, features = features, features_uique = features_unique),
-    srt@assays[[assay]]@meta.features[features, c(feature_annotation), drop = FALSE]
+    data.frame(row.names = features_unique, features = features, features_unique = features_unique),
+    scp_get_feature_metadata(srt, assay = assay)[features, c(feature_annotation), drop = FALSE]
   )
   feature_metadata[, "duplicated"] <- feature_metadata[["features"]] %in% features[duplicated(features)]
 
@@ -10295,12 +10298,12 @@ CellCorHeatmap <- function(srt_query, srt_ref = NULL, bulk_ref = NULL,
   )
   query_metadata <- cbind.data.frame(
     srt_query@meta.data[cell_metadata[["cells"]], c(query_group, intersect(query_cell_annotation, colnames(srt_query@meta.data))), drop = FALSE],
-    as.data.frame(t(srt_query[[query_assay]]@data[intersect(query_cell_annotation, rownames(srt_query[[query_assay]])) %||% integer(), , drop = FALSE]))[cell_metadata[["cells"]], , drop = FALSE]
+    as.data.frame(t(scp_get_assay_data(srt_query, assay = query_assay, slot = "data")[intersect(query_cell_annotation, rownames(srt_query[[query_assay]])) %||% integer(), , drop = FALSE]))[cell_metadata[["cells"]], , drop = FALSE]
   )
   colnames(query_metadata) <- paste0("query_", colnames(query_metadata))
   ref_metadata <- cbind.data.frame(
     srt_ref@meta.data[cell_metadata[["cells"]], c(ref_group, intersect(ref_cell_annotation, colnames(srt_ref@meta.data))), drop = FALSE],
-    as.data.frame(t(srt_ref[[ref_assay]]@data[intersect(ref_cell_annotation, rownames(srt_ref[[ref_assay]])) %||% integer(), , drop = FALSE]))[cell_metadata[["cells"]], , drop = FALSE]
+    as.data.frame(t(scp_get_assay_data(srt_ref, assay = ref_assay, slot = "data")[intersect(ref_cell_annotation, rownames(srt_ref[[ref_assay]])) %||% integer(), , drop = FALSE]))[cell_metadata[["cells"]], , drop = FALSE]
   )
   colnames(ref_metadata) <- paste0("ref_", colnames(ref_metadata))
   cell_metadata <- cbind.data.frame(cell_metadata, cbind.data.frame(query_metadata, ref_metadata))
@@ -11131,8 +11134,9 @@ DynamicHeatmap <- function(srt, lineages, features = NULL, use_fitted = FALSE, b
     if (length(npal[npal != 0]) > 1) {
       stop("feature_annotation_palette and feature_annotation_palcolor must be the same length as feature_annotation")
     }
-    if (any(!feature_annotation %in% colnames(srt@assays[[assay]]@meta.features))) {
-      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% colnames(srt@assays[[assay]]@meta.features)], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
+    feature_annotation_names <- colnames(scp_get_feature_metadata(srt, assay = assay))
+    if (any(!feature_annotation %in% feature_annotation_names)) {
+      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% feature_annotation_names], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
     }
   }
   if (!is.null(separate_annotation)) {
@@ -11208,7 +11212,7 @@ DynamicHeatmap <- function(srt, lineages, features = NULL, use_fitted = FALSE, b
       cell_metadata,
       cbind.data.frame(
         srt@meta.data[rownames(cell_metadata), c(intersect(cell_annotation, colnames(srt@meta.data))), drop = FALSE],
-        t(srt@assays[[assay]]@data[intersect(cell_annotation, rownames(srt@assays[[assay]])) %||% integer(), rownames(cell_metadata), drop = FALSE])
+        t(scp_get_assay_data(srt, assay = assay, slot = "data")[intersect(cell_annotation, rownames(srt@assays[[assay]])) %||% integer(), rownames(cell_metadata), drop = FALSE])
       )
     )
   }
@@ -11266,7 +11270,7 @@ DynamicHeatmap <- function(srt, lineages, features = NULL, use_fitted = FALSE, b
   feature_metadata <- feature_metadata[rownames(feature_metadata) %in% features, , drop = FALSE]
   features <- rownames(feature_metadata)
   if (!is.null(feature_annotation)) {
-    feature_metadata <- cbind.data.frame(feature_metadata, srt@assays[[assay]]@meta.features[rownames(feature_metadata), feature_annotation, drop = FALSE])
+    feature_metadata <- cbind.data.frame(feature_metadata, scp_get_feature_metadata(srt, assay = assay)[rownames(feature_metadata), feature_annotation, drop = FALSE])
   }
 
   if (isTRUE(use_fitted)) {
@@ -11279,10 +11283,10 @@ DynamicHeatmap <- function(srt, lineages, features = NULL, use_fitted = FALSE, b
     mat_raw <- do.call(cbind, mat_list)
   } else {
     mat_list <- list()
-    Y_libsize <- colSums(slot(srt@assays[[assay]], "counts"))
+    Y_libsize <- colSums(scp_get_assay_data(srt, assay = assay, slot = "counts"))
     for (l in lineages) {
       cells <- gsub(pattern = l, replacement = "", x = cell_order_list[[l]])
-      mat_tmp <- as_matrix(rbind(slot(srt@assays[[assay]], slot)[gene, cells, drop = FALSE], t(srt@meta.data[cells, meta, drop = FALSE])))[features, , drop = FALSE]
+      mat_tmp <- as_matrix(rbind(scp_get_assay_data(srt, assay = assay, slot = slot)[gene, cells, drop = FALSE], t(srt@meta.data[cells, meta, drop = FALSE])))[features, , drop = FALSE]
       if (isTRUE(lib_normalize) && min(mat_tmp, na.rm = TRUE) >= 0) {
         if (!is.null(libsize)) {
           libsize_use <- libsize
@@ -12181,7 +12185,7 @@ DynamicPlot <- function(srt, lineages, features, group.by = NULL, cells = NULL, 
   }
 
   df_list <- list()
-  Y_libsize <- colSums(slot(srt@assays[[assay]], "counts"))
+  Y_libsize <- colSums(scp_get_assay_data(srt, assay = assay, slot = "counts"))
   for (l in lineages) {
     raw_matrix <- raw_matrix_list[[l]]
     fitted_matrix <- fitted_matrix_list[[l]]

@@ -693,20 +693,24 @@ buildReferenceFromSeurat <- function(obj, assay = "RNA", pca = "pca", pca_dims =
   message("Saved soft cluster assignments")
 
   if (assay == "RNA") {
+    var_features <- VariableFeatures(obj, assay = assay)
+    assay_data <- scp_get_assay_data(obj, assay = assay, slot = "data")
     vargenes_means_sds <- data.frame(
-      symbol = obj@assays[[assay]]@var.features,
-      mean = rowMeans(obj@assays[[assay]]@data[obj@assays[[assay]]@var.features, ])
+      symbol = var_features,
+      mean = rowMeans(assay_data[var_features, , drop = FALSE])
     )
     vargenes_means_sds$stddev <- symphony::rowSDs(
-      A = obj@assays[[assay]]@data[obj@assays[[assay]]@var.features, ],
+      A = assay_data[var_features, , drop = FALSE],
       row_means = vargenes_means_sds$mean
     )
   } else if (assay == "SCT") {
+    var_features <- VariableFeatures(obj, assay = assay)
+    assay_data <- scp_get_assay_data(obj, assay = assay, slot = "scale.data")
     vargenes_means_sds <- data.frame(
-      symbol = obj@assays[[assay]]@var.features,
-      mean = rowMeans(obj@assays[[assay]]@scale.data[obj@assays[[assay]]@var.features, ])
+      symbol = var_features,
+      mean = rowMeans(assay_data[var_features, , drop = FALSE])
     )
-    asdgc <- Matrix(obj@assays[[assay]]@scale.data[obj@assays[[assay]]@var.features, ], sparse = TRUE)
+    asdgc <- Matrix(assay_data[var_features, , drop = FALSE], sparse = TRUE)
     vargenes_means_sds$stddev <- symphony::rowSDs(
       asdgc,
       vargenes_means_sds$mean
