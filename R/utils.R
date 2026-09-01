@@ -849,7 +849,27 @@ scp_get_assay_data <- function(object, assay = NULL, slot = "data") {
   }
   out <- tryCatch(do.call(SeuratObject::GetAssayData, args_layer), error = function(e) NULL)
   if (is.null(out)) {
-    out <- do.call(SeuratObject::GetAssayData, args_slot)
+    out <- tryCatch(do.call(SeuratObject::GetAssayData, args_slot), error = function(e) NULL)
+  }
+  if (is.null(out)) {
+    stop("Unable to get assay data for slot/layer: ", slot)
+  }
+  return(out)
+}
+
+scp_set_assay_data <- function(object, new_data, assay = NULL, slot = "data") {
+  args_layer <- list(object = object, new.data = new_data, layer = slot)
+  args_slot <- list(object = object, new.data = new_data, slot = slot)
+  if (!is.null(assay) && inherits(object, "Seurat")) {
+    args_layer$assay <- assay
+    args_slot$assay <- assay
+  }
+  out <- tryCatch(do.call(SeuratObject::SetAssayData, args_layer), error = function(e) NULL)
+  if (is.null(out)) {
+    out <- tryCatch(do.call(SeuratObject::SetAssayData, args_slot), error = function(e) NULL)
+  }
+  if (is.null(out)) {
+    stop("Unable to set assay data for slot/layer: ", slot)
   }
   return(out)
 }
@@ -871,6 +891,10 @@ scp_get_feature_metadata <- function(object, assay) {
 
 scp_set_feature_metadata <- function(object, assay, metadata) {
   assay_obj <- object[[assay]]
+  missing_features <- setdiff(rownames(assay_obj), rownames(metadata))
+  if (length(missing_features) > 0) {
+    stop("Feature metadata rows must include all features in assay: ", assay, ". Missing examples: ", paste(head(missing_features, 10), collapse = ","))
+  }
   metadata <- metadata[rownames(assay_obj), , drop = FALSE]
   assay_updated <- tryCatch(
     {

@@ -8074,8 +8074,9 @@ GroupHeatmap <- function(srt, features = NULL, group.by = NULL, split.by = NULL,
     if (length(npal[npal != 0]) > 1) {
       stop("feature_annotation_palette and feature_annotation_palcolor must be the same length as feature_annotation")
     }
-    if (any(!feature_annotation %in% colnames(scp_get_feature_metadata(srt, assay = assay)))) {
-      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% colnames(scp_get_feature_metadata(srt, assay = assay))], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
+    feature_annotation_names <- colnames(scp_get_feature_metadata(srt, assay = assay))
+    if (any(!feature_annotation %in% feature_annotation_names)) {
+      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% feature_annotation_names], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
     }
   }
   if (length(width) == 1) {
@@ -8249,9 +8250,10 @@ GroupHeatmap <- function(srt, features = NULL, group.by = NULL, split.by = NULL,
       t(scp_get_assay_data(srt, assay = assay, slot = "data")[intersect(cell_annotation, rownames(srt@assays[[assay]])) %||% integer(), cells, drop = FALSE])
     )
   )
+  feature_meta <- scp_get_feature_metadata(srt, assay = assay)
   feature_metadata <- cbind.data.frame(
-    data.frame(row.names = features_unique, features = features, features_uique = features_unique),
-    scp_get_feature_metadata(srt, assay = assay)[features, intersect(feature_annotation, colnames(scp_get_feature_metadata(srt, assay = assay))), drop = FALSE]
+    data.frame(row.names = features_unique, features = features, features_unique = features_unique),
+    feature_meta[features, intersect(feature_annotation, colnames(feature_meta)), drop = FALSE]
   )
   feature_metadata[, "duplicated"] <- feature_metadata[["features"]] %in% features[duplicated(features)]
 
@@ -9241,8 +9243,9 @@ FeatureHeatmap <- function(srt, features = NULL, cells = NULL, group.by = NULL, 
     if (length(npal[npal != 0]) > 1) {
       stop("feature_annotation_palette and feature_annotation_palcolor must be the same length as feature_annotation")
     }
-    if (any(!feature_annotation %in% colnames(scp_get_feature_metadata(srt, assay = assay)))) {
-      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% colnames(scp_get_feature_metadata(srt, assay = assay))], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
+    feature_annotation_names <- colnames(scp_get_feature_metadata(srt, assay = assay))
+    if (any(!feature_annotation %in% feature_annotation_names)) {
+      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% feature_annotation_names], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
     }
   }
   if (length(width) == 1) {
@@ -9395,7 +9398,7 @@ FeatureHeatmap <- function(srt, features = NULL, cells = NULL, group.by = NULL, 
     )
   )
   feature_metadata <- cbind.data.frame(
-    data.frame(row.names = features_unique, features = features, features_uique = features_unique),
+    data.frame(row.names = features_unique, features = features, features_unique = features_unique),
     scp_get_feature_metadata(srt, assay = assay)[features, c(feature_annotation), drop = FALSE]
   )
   feature_metadata[, "duplicated"] <- feature_metadata[["features"]] %in% features[duplicated(features)]
@@ -11131,8 +11134,9 @@ DynamicHeatmap <- function(srt, lineages, features = NULL, use_fitted = FALSE, b
     if (length(npal[npal != 0]) > 1) {
       stop("feature_annotation_palette and feature_annotation_palcolor must be the same length as feature_annotation")
     }
-    if (any(!feature_annotation %in% colnames(scp_get_feature_metadata(srt, assay = assay)))) {
-      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% colnames(scp_get_feature_metadata(srt, assay = assay))], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
+    feature_annotation_names <- colnames(scp_get_feature_metadata(srt, assay = assay))
+    if (any(!feature_annotation %in% feature_annotation_names)) {
+      stop("feature_annotation: ", paste0(feature_annotation[!feature_annotation %in% feature_annotation_names], collapse = ","), " is not in the meta data of the ", assay, " assay in the Seurat object.")
     }
   }
   if (!is.null(separate_annotation)) {

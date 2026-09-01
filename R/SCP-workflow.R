@@ -727,7 +727,34 @@ SrtAppend <- function(srt_raw, srt_append,
             if (!info %in% Assays(srt_raw)) {
               srt_raw[[info]] <- srt_append[[info]]
             } else {
-              srt_raw[[info]] <- srt_append[[info]]
+              assay_raw <- srt_raw[[info]]
+              assay_append <- srt_append[[info]]
+              for (slot_use in c("counts", "data", "scale.data")) {
+                assay_data <- tryCatch(scp_get_assay_data(assay_append, slot = slot_use), error = function(e) NULL)
+                if (!is.null(assay_data)) {
+                  assay_raw <- tryCatch(scp_set_assay_data(assay_raw, new_data = assay_data, slot = slot_use), error = function(e) assay_raw)
+                }
+              }
+              tryCatch(
+                {
+                  VariableFeatures(assay_raw) <- VariableFeatures(assay_append)
+                },
+                error = function(e) NULL
+              )
+              if ("key" %in% slotNames(assay_raw) && "key" %in% slotNames(assay_append)) {
+                assay_raw@key <- assay_append@key
+              }
+              if ("misc" %in% slotNames(assay_raw) && "misc" %in% slotNames(assay_append)) {
+                assay_raw@misc <- assay_append@misc
+              }
+              feature_meta_raw <- scp_get_feature_metadata(srt_raw, assay = info)
+              feature_meta_append <- scp_get_feature_metadata(srt_append, assay = info)
+              srt_raw[[info]] <- assay_raw
+              feature_meta <- cbind(
+                feature_meta_raw,
+                feature_meta_append[rownames(feature_meta_raw), setdiff(colnames(feature_meta_append), colnames(feature_meta_raw)), drop = FALSE]
+              )
+              srt_raw <- scp_set_feature_metadata(srt_raw, assay = info, metadata = feature_meta)
             }
           } else {
             srt_raw[[info]] <- srt_append[[info]]
