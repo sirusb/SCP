@@ -64,7 +64,7 @@ AnnotateFeatures <- function(srt, species = "Homo_sapiens", IDtype = c("symbol",
       rownames(db_df) <- db_df[["rowid"]]
       db_df[["rowid"]] <- NULL
       for (assay in assays) {
-        meta.features <- srt[[assay]]@meta.features
+        meta.features <- scp_get_feature_metadata(srt, assay = assay)
         if (any(colnames(db_df) %in% colnames(meta.features)) && isTRUE(overwrite)) {
           meta.features <- meta.features[, setdiff(colnames(meta.features), colnames(db_df))]
         }
@@ -73,7 +73,7 @@ AnnotateFeatures <- function(srt, species = "Homo_sapiens", IDtype = c("symbol",
           stop(paste0("No data to append was found in the Seurat object. Please check if the species name is correct. The expected feature names are ", paste(head(rownames(db_df), 10), collapse = ","), "."))
         }
         meta.features <- cbind(meta.features, db_sub[rownames(meta.features), setdiff(colnames(db_sub), colnames(meta.features)), drop = FALSE])
-        srt[[assay]]@meta.features <- meta.features
+        srt <- scp_set_feature_metadata(srt, assay = assay, metadata = meta.features)
       }
     }
   }
@@ -109,12 +109,12 @@ AnnotateFeatures <- function(srt, species = "Homo_sapiens", IDtype = c("symbol",
     rownames(gtf_columns_collapse) <- gtf_columns_collapse[["rowid"]]
     gtf_columns_collapse[["rowid"]] <- NULL
     for (assay in assays) {
-      meta.features <- srt[[assay]]@meta.features
+      meta.features <- scp_get_feature_metadata(srt, assay = assay)
       if (length(intersect(colnames(meta.features), colnames(gtf_columns_collapse))) > 0 && isTRUE(overwrite)) {
         meta.features <- meta.features[, setdiff(colnames(meta.features), colnames(gtf_columns_collapse))]
       }
       meta.features <- cbind(meta.features, gtf_columns_collapse[rownames(meta.features), setdiff(colnames(gtf_columns_collapse), colnames(meta.features)), drop = FALSE])
-      srt[[assay]]@meta.features <- meta.features
+      srt <- scp_set_feature_metadata(srt, assay = assay, metadata = meta.features)
     }
   }
   return(srt)

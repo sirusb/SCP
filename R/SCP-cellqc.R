@@ -346,10 +346,10 @@ RunCellQC <- function(srt, assay = "RNA", split.by = NULL, return_filtered = FAL
     warning("Data type is not raw counts!", immediate. = TRUE)
   }
   if (!paste0("nCount_", assay) %in% colnames(srt@meta.data)) {
-    srt@meta.data[[paste0("nCount_", assay)]] <- colSums(srt[[assay]]@counts)
+    srt@meta.data[[paste0("nCount_", assay)]] <- colSums(scp_get_assay_data(srt, assay = assay, slot = "counts"))
   }
   if (!paste0("nFeature_", assay) %in% colnames(srt@meta.data)) {
-    srt@meta.data[[paste0("nFeature_", assay)]] <- colSums(srt[[assay]]@counts > 0)
+    srt@meta.data[[paste0("nFeature_", assay)]] <- colSums(scp_get_assay_data(srt, assay = assay, slot = "counts") > 0)
   }
   srt_raw <- srt
   if (!is.null(split.by)) {
@@ -389,8 +389,9 @@ RunCellQC <- function(srt, assay = "RNA", split.by = NULL, return_filtered = FAL
       sp <- species[n]
       prefix <- species_gene_prefix[n]
       sp_genes <- rownames(srt[[assay]])[grep(pattern = paste0("^", prefix), x = rownames(srt[[assay]]))]
-      nCount <- srt[[paste0(c(paste0("nCount_", assay), sp), collapse = ".")]] <- colSums(srt[[assay]]@counts[sp_genes, ])
-      nFeature <- srt[[paste0(c(paste0("nFeature_", assay), sp), collapse = ".")]] <- colSums(srt[[assay]]@counts[sp_genes, ] > 0)
+      assay_counts <- scp_get_assay_data(srt, assay = assay, slot = "counts")
+      nCount <- srt[[paste0(c(paste0("nCount_", assay), sp), collapse = ".")]] <- colSums(assay_counts[sp_genes, , drop = FALSE])
+      nFeature <- srt[[paste0(c(paste0("nFeature_", assay), sp), collapse = ".")]] <- colSums(assay_counts[sp_genes, , drop = FALSE] > 0)
       percent.mito <- srt[[paste0(c("percent.mito", sp), collapse = ".")]] <- PercentageFeatureSet(object = srt, assay = assay, pattern = paste0("(", paste0("^", prefix, "-*", mito_pattern), ")", collapse = "|"), features = mito_gene)[[1]]
       percent.ribo <- srt[[paste0(c("percent.ribo", sp), collapse = ".")]] <- PercentageFeatureSet(object = srt, assay = assay, pattern = paste0("(", paste0("^", prefix, "-*", ribo_pattern), ")", collapse = "|"), features = ribo_gene)[[1]]
       percent.genome <- srt[[paste0(c("percent.genome", sp), collapse = ".")]] <- PercentageFeatureSet(object = srt, assay = assay, pattern = paste0("^", prefix))[[1]]

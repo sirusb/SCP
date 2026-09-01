@@ -840,6 +840,60 @@ as_matrix <- function(x) {
   }
 }
 
+scp_get_assay_data <- function(object, assay = NULL, slot = "data") {
+  args_layer <- list(object = object, layer = slot)
+  args_slot <- list(object = object, slot = slot)
+  if (!is.null(assay) && inherits(object, "Seurat")) {
+    args_layer$assay <- assay
+    args_slot$assay <- assay
+  }
+  out <- tryCatch(do.call(SeuratObject::GetAssayData, args_layer), error = function(e) NULL)
+  if (is.null(out)) {
+    out <- do.call(SeuratObject::GetAssayData, args_slot)
+  }
+  return(out)
+}
+
+scp_get_feature_metadata <- function(object, assay) {
+  assay_obj <- object[[assay]]
+  out <- tryCatch(assay_obj[[]], error = function(e) NULL)
+  if (!is.null(out)) {
+    return(out)
+  }
+  if ("meta.features" %in% slotNames(assay_obj)) {
+    return(slot(assay_obj, "meta.features"))
+  }
+  if ("meta.data" %in% slotNames(assay_obj)) {
+    return(slot(assay_obj, "meta.data"))
+  }
+  data.frame(row.names = rownames(assay_obj))
+}
+
+scp_set_feature_metadata <- function(object, assay, metadata) {
+  assay_obj <- object[[assay]]
+  metadata <- metadata[rownames(assay_obj), , drop = FALSE]
+  assay_updated <- tryCatch(
+    {
+      assay_obj[[]] <- metadata
+      assay_obj
+    },
+    error = function(e) NULL
+  )
+  if (is.null(assay_updated)) {
+    slot_name <- if ("meta.features" %in% slotNames(assay_obj)) {
+      "meta.features"
+    } else if ("meta.data" %in% slotNames(assay_obj)) {
+      "meta.data"
+    } else {
+      stop("No feature metadata slot found for assay: ", assay)
+    }
+    slot(assay_obj, slot_name) <- metadata
+    assay_updated <- assay_obj
+  }
+  object[[assay]] <- assay_updated
+  return(object)
+}
+
 #' Capitalizes the characters
 #' Making the first letter uppercase
 #'

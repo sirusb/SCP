@@ -5007,7 +5007,7 @@ RunDynamicFeatures <- function(srt, lineages, features = NULL, suffix = lineages
         stop("'features' or 'n_candidates' must provided at least one.")
       }
       HVF <- VariableFeatures(FindVariableFeatures(srt_sub, nfeatures = n_candidates, assay = assay), assay = assay)
-      HVF_counts <- srt_sub[[assay]]@counts[HVF, , drop = FALSE]
+      HVF_counts <- scp_get_assay_data(srt_sub, assay = assay, slot = "counts")[HVF, , drop = FALSE]
       HVF <- HVF[apply(HVF_counts, 1, function(x) {
         length(unique(x))
       }) >= minfreq]
@@ -5380,7 +5380,7 @@ srt_to_adata <- function(srt, features = NULL,
     }
   }
 
-  var <- srt[[assay_X]]@meta.features[features, , drop = FALSE]
+  var <- scp_get_feature_metadata(srt, assay = assay_X)[features, , drop = FALSE]
   if (ncol(var) > 0) {
     for (i in seq_len(ncol(var))) {
       if (is.logical(var[, i]) && !identical(colnames(var)[i], "highly_variable")) {

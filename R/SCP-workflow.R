@@ -242,7 +242,8 @@ check_srtList <- function(srtList, batch, assay = NULL,
       } else {
         DefaultAssay(srtList[[i]]) <- "SCT"
       }
-      if (!"residual_variance" %in% colnames(srtList[[i]]@assays$SCT@meta.features)) {
+      feature.attr <- scp_get_feature_metadata(srtList[[i]], assay = "SCT")
+      if (!"residual_variance" %in% colnames(feature.attr)) {
         if (length(srtList[[i]]@assays$SCT@SCTModel.list) > 1) {
           index <- which(sapply(srtList[[i]]@assays$SCT@SCTModel.list, function(x) nrow(x@cell.attributes) == ncol(srtList[[i]])))
         } else {
@@ -250,13 +251,11 @@ check_srtList <- function(srtList, batch, assay = NULL,
         }
         model <- srtList[[i]]@assays$SCT@SCTModel.list[[index]]
         feature.attr <- SCTResults(object = model, slot = "feature.attributes")
-      } else {
-        feature.attr <- srtList[[i]]@assays$SCT@meta.features
       }
       nfeatures <- min(nHVF, nrow(x = feature.attr))
       top.features <- rownames(x = feature.attr)[head(order(feature.attr$residual_variance, decreasing = TRUE), n = nfeatures)]
       VariableFeatures(srtList[[i]], assay = DefaultAssay(srtList[[i]])) <- top.features
-      srtList[[i]]@assays$SCT@meta.features <- feature.attr
+      srtList[[i]] <- scp_set_feature_metadata(srtList[[i]], assay = "SCT", metadata = feature.attr)
     }
   }
 
@@ -728,15 +727,7 @@ SrtAppend <- function(srt_raw, srt_append,
             if (!info %in% Assays(srt_raw)) {
               srt_raw[[info]] <- srt_append[[info]]
             } else {
-              srt_raw[[info]]@counts <- srt_append[[info]]@counts
-              srt_raw[[info]]@data <- srt_append[[info]]@data
-              srt_raw[[info]]@key <- srt_append[[info]]@key
-              srt_raw[[info]]@var.features <- srt_append[[info]]@var.features
-              srt_raw[[info]]@misc <- srt_append[[info]]@misc
-              srt_raw[[info]]@meta.features <- cbind(srt_raw[[info]]@meta.features, srt_append[[info]]@meta.features[
-                rownames(srt_raw[[info]]@meta.features),
-                setdiff(colnames(srt_append[[info]]@meta.features), colnames(srt_raw[[info]]@meta.features))
-              ])
+              srt_raw[[info]] <- srt_append[[info]]
             }
           } else {
             srt_raw[[info]] <- srt_append[[info]]
